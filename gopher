@@ -1,0 +1,38 @@
+#!/bin/sh
+if [ "$#" -lt 3 ];then
+  printf "usage: domain port path\n"
+  exit 1
+fi
+if [ "$2" = "" ];then
+  port=70
+else
+  port=$2
+fi
+type="$(printf "%s\n" "$3" | cut -d/ -f2)"
+if [ "$type" = "" ];then
+  type=1
+  path="$3"
+else
+  path="$(printf "%s\n" $3 | cut -d/ -f3-)"
+fi
+
+if [ "$type" = 0 ];then
+  mimetype=text/plain
+fi
+if [ "$type" = 1 ];then
+  mimetype=text/x-gophermap
+fi
+if [ "$type" = p ];then
+  mimetype=image/png
+fi
+
+
+mkdir -p "${PREFIX}/var/cache/gopher"
+
+cachename="${PREFIX}/var/cache/gopher/$(printf "%s:%s:%s\n" "$1" "$port" "$path" | tr '\n' '\0' | xargs -0 uriescape | sed 's|/|%2f|g')"
+
+if [ ! -e $cachename ];then #if the cache doesn't exist, make it.
+  printf "%s\n" "$path" | ncat $1 $port > "$cachename"
+fi
+#cat "$cachename"
+uristart "$(printf "file://%s?mime-type=%s\n" "$cachename" "$mimetype")"
