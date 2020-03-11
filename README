@@ -1,0 +1,8 @@
+golang, but not really, this is about port 70 gopher.
+
+These two scripts are meant to be triggered by uristart
+and the output need to go to a terminal that'll make URLs clickable
+and then pass the link back into uristart.
+
+I abuse the file: URI by adding a query string that specifies the mime-type
+that any file handler should use to launch file.
