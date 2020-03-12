@@ -25,6 +25,9 @@ fi
 if [ "$type" = p ];then
   mimetype=image/png
 fi
+if [ "$type" = g ];then
+  mimetype=image/gif
+fi
 if [ "$type" = 7 ];then
   mimetype=text/x-gophermap
   path="${path}"$'\t'"$(echo | dmenu -p 'gopher> ')"
@@ -33,10 +36,11 @@ fi
 
 mkdir -p "${PREFIX}/var/cache/gopher"
 
-cachename="${PREFIX}/var/cache/gopher/$(printf "%s:%s:%s\n" "$1" "$port" "$path" | tr '\n' '\0' | xargs -0 uriescape | sed 's|/|%2f|g')"
+cachename="${PREFIX}/var/cache/gopher/$(printf "gopher://%s:%s/%s\n" "$1" "$port" "$type$path" | tr '\n' '\0' | xargs -0 uriescape | sed 's|/|%2f|g')"
 
 if [ ! -e $cachename ];then #if the cache doesn't exist, make it.
   printf "%s\n" "$path" | ncat $1 $port > "$cachename"
 fi
 #cat "$cachename"
 uristart "$(printf "file://%s?mime-type=%s\n" "$cachename" "$mimetype")"
+rm "$cachename" #ha. who needs cache?
