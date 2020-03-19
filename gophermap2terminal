@@ -2,7 +2,7 @@
 ### this script is just meant to convert a gophermap into something to look at in my terminal
 ### you can use this as a base to convert the gophermap into any other format you like
 IFS=$'\t'
-tr -d '\r' | sed 's/^\(.\)/\1\t/g' \
+tr -d '\r' | sed 's/^\(.\)/\1\t/g' | sed 's/\t\t/\t \t/g' \
   | while read type desc path domain port;do
       if [ "$type" = "." ];then
         break
