@@ -7,20 +7,51 @@ tr -d '\r' | sed 's/^\(.\)/\1\t/g' \
       if [ "$type" = "." ];then
         break
       fi
+      case $type in
+       i)
+        color=32
+        longtype="info"
+        ;;
+       g|p)
+        color=34
+        longtype="img"
+        ;;
+       0)
+        color=35
+        longtype="text"
+        ;;
+       1)
+        color=36
+        longtype="gmap"
+        ;;
+       7)
+        color=33
+        longtype="form"
+        ;;
+       h)
+        color=31
+        longtype="html"
+        ;;
+       *)
+        color=37 #white
+        longtype="$type"
+        ;;
+      esac
       if [ "$type" = i ];then
-        printf "[i] %s\n" "$desc"
-      elif [ "$type" = p -o "$type" = g ];then ### things in here are any things to be inlined. not only just images.
-        ### need to download the image and inline it with img2sixel
-        printf "[p] -----START OF INLINED DATA-----\n"
-        gopher "$domain" "$port" "/$type$path" 2>/dev/null
-        printf "[p] -----END OF INLINED DATA-----\n"
-        ### inside that script it'll notice it is a png, then instead of xli it, it'll img2sixel?
+        printf "\x1b[%sm[%s]\x1b[0m %s\n" "$color" "$longtype" "$desc"
       else
         if grep '^URL:' <<< $path 2>&1 >/dev/null;then
-          printf "[%s] %s: %s\n" "$type" "$desc" "$(printf "%s\n" "$path" | cut -d: -f2-)"
+          printf "\x1b[%sm[%4s]\x1b[0m %s: %s\n" "$color" "$longtype" "$desc" "$(printf "%s\n" "$path" | cut -d: -f2-)"
         else
-          printf "[%s] %s: %s\n" "$type" "$desc" "$(printf "scheme: gopher\ndomain: %s\nport: %s\npath: %s\n" "$domain" "$port" "$type$path" | urijoin)"
+          printf "\x1b[%sm[%4s]\x1b[0m %s: %s\n" "$color" "$longtype" "$desc" "$(printf "scheme: gopher\ndomain: %s\nport: %s\npath: %s\n" "$domain" "$port" "$type$path" | urijoin)"
         fi
+      fi
+      if [ "$type" = p -o "$type" = g ];then ### things in here are any things to be inlined. not only just images.
+        ### need to download the image and inline it with img2sixel
+        printf "\x1b[%sm[%4s]\x1b[0m -----START OF INLINED DATA-----\n" "$color" "$longtype"
+        gopher "$domain" "$port" "/$type$path" 2>/dev/null
+        printf "\x1b[%sm[%4s]\x1b[0m -----END OF INLINED DATA-----\n" "$color" "$longtype"
+        ### inside that script it'll notice it is a png, then instead of xli it, it'll img2sixel?
       fi
 done
 ### we don't have a way of knowing what file we're reading... pass as argument instead of stdin? :/
