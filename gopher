@@ -28,6 +28,9 @@ fi
 if [ "$type" = g ];then
   mimetype=image/gif
 fi
+if [ "$type" = I ];then
+  mimetype=image/unknown
+fi
 if [ "$type" = 7 ];then
   mimetype=text/gophermap
   path="${path}"$'\t'"$(echo | dmenu -p 'gopher> ')"
