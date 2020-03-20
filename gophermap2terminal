@@ -3,7 +3,7 @@
 ### you can use this as a base to convert the gophermap into any other format you like
 IFS=$'\t'
 tr -d '\r' | sed 's/^\(.\)/\1\t/g' | sed 's/\t\t/\t \t/g' \
-  | while read type desc path domain port;do
+  | while read -r type desc path domain port;do
       if [ "$type" = "." ];then
         break
       fi
@@ -12,7 +12,7 @@ tr -d '\r' | sed 's/^\(.\)/\1\t/g' | sed 's/\t\t/\t \t/g' \
         color=32
         longtype="info"
         ;;
-       g|p)
+       g|p|I)
         color=34
         longtype="img"
         ;;
@@ -46,7 +46,7 @@ tr -d '\r' | sed 's/^\(.\)/\1\t/g' | sed 's/\t\t/\t \t/g' \
           printf "\x1b[%sm[%4s]\x1b[0m %s: %s\n" "$color" "$longtype" "$desc" "$(printf "scheme: gopher\ndomain: %s\nport: %s\npath: %s\n" "$domain" "$port" "$type$path" | urijoin)"
         fi
       fi
-      if [ "$type" = p -o "$type" = g ];then ### things in here are any things to be inlined. not only just images.
+      if [ "$type" = p -o "$type" = g -o "$type" = I ];then ### things in here are any things to be inlined. not only just images.
         ### need to download the image and inline it with img2sixel
         printf "\x1b[%sm[%4s]\x1b[0m -----START OF INLINED DATA-----\n" "$color" "$longtype"
         gopher "$domain" "$port" "/$type$path" 2>/dev/null
