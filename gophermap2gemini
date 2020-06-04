@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+### this script is just meant to convert a gophermap into something to look at in my terminal
+### you can use this as a base to convert the gophermap into any other format you like
+IFS=$'\t'
+tr -d '\r' | sed 's/^\(.\)/\1\t/g' | sed 's/\t\t/\t \t/g' \
+  | while read -r type desc path domain port;do
+      if [ "$type" = "." ];then
+        break
+      fi
+      case $type in
+       i)
+        color=32
+        longtype="info"
+        ;;
+       g|p|I)
+        color=34
+        longtype="img"
+        ;;
+       0)
+        color=35
+        longtype="text"
+        ;;
+       1)
+        color=36
+        longtype="gmap"
+        ;;
+       7)
+        color=33
+        longtype="form"
+        ;;
+       h)
+        color=31
+        longtype="html"
+        ;;
+       *)
+        color=37 #white
+        longtype="$type"
+        ;;
+      esac
+      if [ "$type" = i ];then
+        printf "\x1b[%sm[%s]\x1b[0m %s\n" "$color" "$longtype" "$desc"
+      else
+        if grep '^URL:' <<< $path 2>&1 >/dev/null;then
+          printf "\x1b[%sm[%4s]\x1b[0m %s: %s\n" "$color" "$longtype" "$desc" "$(printf "%s\n" "$path" | cut -d: -f2-)"
+        else
+          printf "\x1b[%sm[%4s]\x1b[0m %s: %s\n" "$color" "$longtype" "$desc" "$(printf "scheme: gopher\ndomain: %s\nport: %s\npath: %s\n" "$domain" "$port" "$type$path" | urijoin)"
+        fi
+      fi
+      if [ "$type" = p -o "$type" = g -o "$type" = I ];then ### things in here are any things to be inlined. not only just images.
+        ### need to download the image and inline it with img2sixel
+        printf "\x1b[%sm[%4s]\x1b[0m -----START OF INLINED DATA-----\n" "$color" "$longtype"
+        gopher "$domain" "$port" "/$type$path" 2>/dev/null
+        printf "\x1b[%sm[%4s]\x1b[0m -----END OF INLINED DATA-----\n" "$color" "$longtype"
+        ### inside that script it'll notice it is a png, then instead of xli it, it'll img2sixel?
+      fi
+done
+### we don't have a way of knowing what file we're reading... pass as argument instead of stdin? :/
