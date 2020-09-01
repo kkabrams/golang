@@ -35,6 +35,9 @@ if [ "$type" = 7 ];then
   mimetype=text/gophermap
   path="${path}"$'\t'"$(echo | dmenu -p 'gopher> ')"
 fi
+if [ "$type" = 9 ];then
+  mpv "gopher://$1:$port/$type$path"
+fi
 
 
 mkdir -p "${PREFIX}/var/cache/gopher"
