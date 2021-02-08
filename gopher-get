@@ -1,0 +1,8 @@
+#!/bin/sh
+### I *require* that the type identifier is separated from the path by a /
+### I'm not interested in hacks to work around this atm.
+domain="$(printf "%s\n" "$1" | uricut -d)"
+port="$(printf "%s\n" "$1" | uricut -P)"
+path="/$(printf "%s\n" "$1" | uricut -p | cut -d/ -f3-)"
+if [ ! "$port" ];then port=70;fi
+printf "%s\r\n" "$path" | nc $domain $port
